@@ -2,15 +2,15 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getDatabase, ref, set, onValue, update, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
-// Firebase設定（各自のプロジェクトの設定に置き換える）
+// Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT.firebaseio.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyCAa8nMbA1siw3eTpgzJdrfkTBxWOomCUE",
+  authDomain: "online-janken-202601.firebaseapp.com",
+  databaseURL: "https://online-janken-202601-default-rtdb.firebaseio.com",
+  projectId: "online-janken-202601",
+  storageBucket: "online-janken-202601.firebasestorage.app",
+  messagingSenderId: "900303967163",
+  appId: "1:900303967163:web:eecd99eec3e56b76832a9e"
 };
 
 // Firebase初期化
@@ -170,4 +170,5 @@ resetBtn.addEventListener('click', () => {
     update(playerRef, { choice: null });
     resultDiv.style.display = 'none';
     resetBtn.style.display = 'none';
+
 });
