@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>オンライン対戦じゃんけん</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 オンライン対戦じゃんけん</h1>
+        
+        <!-- ルーム選択画面 -->
+        <div id="room-selection">
+            <h2>ルームに参加</h2>
+            <input type="text" id="room-id" placeholder="ルームID (例: room1)">
+            <input type="text" id="player-name" placeholder="あなたの名前">
+            <button id="join-btn">参加する</button>
+        </div>
+
+        <!-- ゲーム画面 -->
+        <div id="game-area" style="display:none;">
+            <div id="status">待機中...</div>
+            <div id="players-info"></div>
+            
+            <div class="choices">
+                <button class="choice-btn" data-choice="rock">✊ グー</button>
+                <button class="choice-btn" data-choice="paper">✋ パー</button>
+                <button class="choice-btn" data-choice="scissors">✌️ チョキ</button>
+            </div>
+
+            <div id="result"></div>
+            <button id="reset-btn" style="display:none;">もう一度</button>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
