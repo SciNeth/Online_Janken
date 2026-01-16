@@ -1,16 +1,16 @@
 // Firebase SDKをインポート
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getDatabase, ref, set, onValue, update, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+import { getDatabase, ref, set, onValue, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
-// Your web app's Firebase configuration
+// Firebase設定（各自のプロジェクトの設定に置き換える）
 const firebaseConfig = {
-  apiKey: "AIzaSyCAa8nMbA1siw3eTpgzJdrfkTBxWOomCUE",
-  authDomain: "online-janken-202601.firebaseapp.com",
-  databaseURL: "https://online-janken-202601-default-rtdb.firebaseio.com",
-  projectId: "online-janken-202601",
-  storageBucket: "online-janken-202601.firebasestorage.app",
-  messagingSenderId: "900303967163",
-  appId: "1:900303967163:web:eecd99eec3e56b76832a9e"
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
 };
 
 // Firebase初期化
@@ -102,7 +102,20 @@ function updateGameState(roomData) {
         
         // 両方選択済みなら結果判定
         if (playerList.every(([_, data]) => data.choice)) {
-            judgeResult(playerList);
+            // 結果がまだFirebaseに保存されていない場合のみ判定
+            if (!roomData.result) {
+                judgeResult(playerList);
+            } else {
+                // 既に結果がある場合は表示
+                displayResult(roomData.result);
+            }
+        } else if (roomData.result) {
+            // リセット後の状態を反映
+            resultDiv.style.display = 'none';
+            resultDiv.textContent = '';
+            resetBtn.style.display = 'none';
+            statusDiv.textContent = '手を選んでください！';
+            enableChoices();
         }
     } else if (playerList.length > 2) {
         statusDiv.textContent = 'ルームが満員です';
@@ -137,24 +150,49 @@ function judgeResult(playerList) {
     const choice1 = player1[1].choice;
     const choice2 = player2[1].choice;
     
+    let winner = null;
     let resultText = '';
     
     if (choice1 === choice2) {
         resultText = '引き分け！';
+        winner = 'draw';
     } else if (
         (choice1 === 'rock' && choice2 === 'scissors') ||
         (choice1 === 'paper' && choice2 === 'rock') ||
         (choice1 === 'scissors' && choice2 === 'paper')
     ) {
         resultText = `${player1[1].name} の勝ち！🎉`;
+        winner = player1[0];
     } else {
         resultText = `${player2[1].name} の勝ち！🎉`;
+        winner = player2[0];
     }
     
-    resultDiv.textContent = resultText;
+    // 結果をFirebaseに保存（これで両方の画面に表示される！）
+    const resultData = {
+        text: resultText,
+        winner: winner,
+        player1: { name: player1[1].name, choice: choice1 },
+        player2: { name: player2[1].name, choice: choice2 }
+    };
+    
+    const roomRef = ref(database, `rooms/${currentRoom}/result`);
+    set(roomRef, resultData);
+    
+    // ローカルでも表示
+    displayResult(resultData);
+}
+
+function displayResult(resultData) {
+    if (!resultData) return;
+    
+    resultDiv.textContent = resultData.text;
     resultDiv.style.display = 'block';
     resetBtn.style.display = 'block';
-    statusDiv.textContent = `${player1[1].name}: ${getEmoji(choice1)} vs ${player2[1].name}: ${getEmoji(choice2)}`;
+    
+    statusDiv.textContent = `${resultData.player1.name}: ${getEmoji(resultData.player1.choice)} vs ${resultData.player2.name}: ${getEmoji(resultData.player2.choice)}`;
+    
+    disableChoices();
 }
 
 function getEmoji(choice) {
@@ -164,11 +202,19 @@ function getEmoji(choice) {
 
 // リセット機能
 resetBtn.addEventListener('click', () => {
-    const roomRef = ref(database, `rooms/${currentRoom}`);
     const playerRef = ref(database, `rooms/${currentRoom}/players/${playerId}`);
     
+    // プレイヤーの選択をリセット
     update(playerRef, { choice: null });
+    
+    // 結果を削除（これで両方の画面がリセットされる！）
+    const resultRef = ref(database, `rooms/${currentRoom}/result`);
+    set(resultRef, null);
+    
+    // UIをリセット
     resultDiv.style.display = 'none';
+    resultDiv.textContent = '';
     resetBtn.style.display = 'none';
-
+    statusDiv.textContent = '手を選んでください！';
+    enableChoices();
 });
